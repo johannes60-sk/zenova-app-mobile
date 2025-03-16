@@ -1,74 +1,73 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  SafeAreaView,
+  useWindowDimensions,
+} from "react-native";
+import "./../styles/global.css";
+import { format } from "date-fns";
+import { Header } from "@/components/Home/CustomHeader";
+import { WeekProgress } from "@/components/Home/WeekProgress";
+import { WorkoutTime } from "@/components/Home/WorkoutTime";
+import { WorkoutCard } from "@/components/Home/WorkoutCard";
+import { DailyWorkout } from "@/components/Home/DailyWorkout";
 
 export default function HomeScreen() {
+  const { width } = useWindowDimensions();
+  const [selectedDay, setSelectedDay] = useState(new Date().getDay());
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView style={styles.container}>
+      <Header />
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        <WeekProgress selectedDay={selectedDay} onSelectDay={setSelectedDay} />
+        <DailyWorkout day={selectedDay} />
+        <WorkoutTime />
+        <View style={styles.workoutsSection}>
+          <Text style={styles.workoutTimeTitle}>Start Workout</Text>
+
+          <WorkoutCard
+            title="Pull"
+            exercises={5}
+            imageUrl="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=500"
+          />
+          <WorkoutCard
+            title="Push"
+            exercises={4}
+            imageUrl="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500"
+          />
+          <WorkoutCard
+            title="Legs"
+            exercises={5}
+            imageUrl="https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=500"
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "#000000",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  scrollView: {
+    flex: 1,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  workoutsSection: {
+    padding: 20,
+  },
+  workoutTimeTitle: {
+    color: "#FFFFFF",
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 30,
   },
 });
