@@ -3,6 +3,8 @@ import { Image, Text, TouchableOpacity, View } from "react-native";
 import { ArrowRight, Timer, Target } from "lucide-react-native";
 import { DayIndexFormatToDayName } from "@/app/utils/day-index-format-to-day-name";
 import { DAILY_WORKOUTS } from "@/app/const/home";
+import { ButtonText, GradientCtaButton } from "@/app/styles/custom-component";
+import Icon from "react-native-vector-icons/Ionicons";
 
 type DailyWorkoutProps = {
   day: number;
@@ -58,10 +60,17 @@ export const DailyWorkout = ({ day }: DailyWorkoutProps) => {
             </View>
           )}
         </View>
-        <TouchableOpacity style={styles.startWorkoutButton}>
-          <Text style={styles.startWorkoutText}>Start workout</Text>
-          <ArrowRight color="#000000" size={20} />
-        </TouchableOpacity>
+        <GradientCtaButton>
+          <View style={styles.startWorkoutButton}>
+            <ButtonText>Start workout</ButtonText>
+            <Icon
+              name="arrow-forward-outline"
+              className="pl-1"
+              color="#FFFFFF"
+              size={18}
+            />
+          </View>
+        </GradientCtaButton>
       </View>
     </View>
   );
@@ -169,17 +178,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   startWorkoutButton: {
-    width: "35%",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 30,
-    padding: 10,
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  startWorkoutText: {
-    color: "#000000",
-    fontSize: 14,
-    fontWeight: "bold",
   },
 });

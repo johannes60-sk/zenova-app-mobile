@@ -1,24 +1,53 @@
-import { ArrowRight } from "lucide-react-native";
-import { useState } from "react";
+import { generateWorkoutData } from "@/app/const/home";
+import { SectionTitle } from "@/app/styles/custom-component";
+import { useEffect, useState } from "react";
 import { TouchableOpacity, View, StyleSheet, Text } from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { WorkoutGraph } from "./WorkoutGraph";
 
 export const WorkoutTime = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("Day");
   const periods = ["Day", "Week", "Month"];
+  const [workoutData, setWorkoutData] = useState(generateWorkoutData("Day"));
+  const totalDuration = workoutData.reduce(
+    (sum, data) => sum + data.duration,
+    0
+  );
+
+  const formatTotalDuration = (minutes) => {
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      return `${hours}h${remainingMinutes > 0 ? ` ${remainingMinutes}m` : ""}`;
+    }
+    return `${minutes} min`;
+  };
+
+  useEffect(() => {
+    setWorkoutData(generateWorkoutData(selectedPeriod));
+  }, [selectedPeriod]);
 
   return (
     <View style={styles.workoutTimeSection}>
       <View style={styles.workoutTimeHeader}>
-        <Text style={styles.workoutTimeTitle}>Workout time</Text>
+        <SectionTitle>Workout time</SectionTitle>
         <TouchableOpacity style={styles.statsButton}>
           <Text style={styles.statsButtonText}>My statistics</Text>
-          <ArrowRight color="#FFFFFF" size={20} />
+          <Icon name="arrow-forward-outline" color="#FFFFFF" size={18} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.timeDisplay}>
-        <Text style={styles.timeValue}>0 min</Text>
-        <ArrowRight color="#FFFFFF" size={20} />
+        <Text style={styles.timeValue}>
+          {formatTotalDuration(totalDuration)}
+        </Text>
+        <Icon
+          name="stats-chart-outline"
+          color="#00B3CC"
+          className="mt-1"
+          size={20}
+        />
       </View>
 
       <View style={styles.periodSelector}>
@@ -43,7 +72,7 @@ export const WorkoutTime = () => {
         ))}
       </View>
 
-      <View style={styles.graph}>
+      {/* <View style={styles.graph}>
         <View style={styles.graphLine} />
         <View style={styles.graphMarker} />
         <View style={styles.graphDays}>
@@ -58,6 +87,9 @@ export const WorkoutTime = () => {
           <Text style={styles.timeLabel}>0 min</Text>
           <Text style={styles.timeLabel}>0 min</Text>
         </View>
+      </View> */}
+      <View style={styles.graph}>
+        <WorkoutGraph />
       </View>
     </View>
   );
@@ -72,11 +104,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
-  },
-  workoutTimeTitle: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: "bold",
   },
   statsButton: {
     flexDirection: "row",
@@ -96,7 +123,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   timeValue: {
-    color: "#FFFFFF",
+    color: "#00B3CC",
     fontSize: 32,
     fontWeight: "bold",
     fontStyle: "italic",
@@ -116,25 +143,29 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   periodButtonActive: {
-    backgroundColor: "#FFD700",
+    backgroundColor: "#00B3CC",
   },
   periodButtonText: {
-    color: "#FFFFFF",
+    color: "#E0E0E0",
     fontSize: 16,
   },
   periodButtonTextActive: {
-    color: "#000000",
+    color: "#121212",
   },
 
   graph: {
-    height: 200,
     marginTop: 20,
+    flex: 1,
+    justifyContent: "space-between",
+    alignItems: "center",
+    margin: 0,
+    padding: 0,
   },
   graphLine: {
     position: "absolute",
     width: "100%",
     height: 2,
-    backgroundColor: "#FFD700",
+    backgroundColor: "#00B3CC",
     top: "50%",
   },
   graphMarker: {
@@ -142,7 +173,7 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: "#FFD700",
+    backgroundColor: "#00BFA6",
     top: "50%",
     left: "50%",
     marginTop: -8,
@@ -166,7 +197,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   timeLabel: {
-    color: "#666666",
+    color: "#E0E0E0",
     fontSize: 12,
   },
 });

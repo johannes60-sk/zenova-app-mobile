@@ -14,6 +14,10 @@ import { WeekProgress } from "@/components/Home/WeekProgress";
 import { WorkoutTime } from "@/components/Home/WorkoutTime";
 import { WorkoutCard } from "@/components/Home/WorkoutCard";
 import { DailyWorkout } from "@/components/Home/DailyWorkout";
+import { Container, SectionTitle } from "../styles/custom-component";
+import { theme } from "../styles/theme";
+import { ThemeProps, ThemeProvider } from "styled-components/native";
+import { GestureHandlerRootView } from "react-native-gesture-handler"; // Importez GestureHandlerRootView
 
 export default function HomeScreen() {
   const { width } = useWindowDimensions();
@@ -21,34 +25,43 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
-        <WeekProgress selectedDay={selectedDay} onSelectDay={setSelectedDay} />
-        <DailyWorkout day={selectedDay} />
-        <WorkoutTime />
-        <View style={styles.workoutsSection}>
-          <Text style={styles.workoutTimeTitle}>Start Workout</Text>
+      <ThemeProvider theme={theme}>
+        <Container>
+          <Header />
+          <ScrollView
+            style={styles.scrollView}
+            showsVerticalScrollIndicator={false}
+          >
+            <WeekProgress
+              selectedDay={selectedDay}
+              onSelectDay={setSelectedDay}
+            />
+            <DailyWorkout day={selectedDay} />
+            <WorkoutTime />
+            <View style={styles.workoutsSection}>
+              <View style={{ marginBottom: 20 }}>
+                <SectionTitle>Start Workout</SectionTitle>
+              </View>
 
-          <WorkoutCard
-            title="Pull"
-            exercises={5}
-            imageUrl="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=500"
-          />
-          <WorkoutCard
-            title="Push"
-            exercises={4}
-            imageUrl="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500"
-          />
-          <WorkoutCard
-            title="Legs"
-            exercises={5}
-            imageUrl="https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=500"
-          />
-        </View>
-      </ScrollView>
+              <WorkoutCard
+                title="Pull"
+                exercises={5}
+                imageUrl="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=500"
+              />
+              <WorkoutCard
+                title="Push"
+                exercises={4}
+                imageUrl="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500"
+              />
+              <WorkoutCard
+                title="Legs"
+                exercises={5}
+                imageUrl="https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=500"
+              />
+            </View>
+          </ScrollView>
+        </Container>
+      </ThemeProvider>
     </SafeAreaView>
   );
 }
@@ -56,18 +69,12 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000000",
+    backgroundColor: "#121212",
   },
   scrollView: {
     flex: 1,
   },
   workoutsSection: {
     padding: 20,
-  },
-  workoutTimeTitle: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 30,
   },
 });

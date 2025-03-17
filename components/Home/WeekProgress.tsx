@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { format } from "date-fns";
+import { ButtonText, GradientCtaButton, SectionTitle } from "@/app/styles/custom-component";
 
 type WeekProgressProps = {
   selectedDay: number;
@@ -21,7 +22,7 @@ export const WeekProgress = ({
   return (
     <View style={styles.weekSection}>
       <View style={styles.weekHeader}>
-        <Text style={styles.weekTitle}>This week</Text>
+        <SectionTitle>This week</SectionTitle>
         <View style={styles.stats}>
           <View style={styles.stat}>
             <Text style={styles.statValue}>0</Text>
@@ -34,9 +35,9 @@ export const WeekProgress = ({
         </View>
       </View>
 
-      <TouchableOpacity style={styles.startButton}>
-        <Text style={styles.startButtonText}>Start a workout</Text>
-      </TouchableOpacity>
+      <GradientCtaButton>
+        <ButtonText>Start a workout</ButtonText>
+      </GradientCtaButton>
 
       <View style={styles.calendar}>
         {DAYS.map((day, index) => {
@@ -96,11 +97,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
-  },
-  weekTitle: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: "bold",
   },
   stats: {
     flexDirection: "row",

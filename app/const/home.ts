@@ -1,3 +1,4 @@
+import { subDays } from "date-fns";
 import { Workout } from "../types/home";
 
 export const DAILY_WORKOUTS: { [dayKey: string]: Workout } = {
@@ -193,4 +194,55 @@ export const DAILY_WORKOUTS: { [dayKey: string]: Workout } = {
     mainImage:
       "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
+};
+
+// Generate realistic workout data
+export const generateWorkoutData = (period) => {
+  const now = new Date();
+  let data = [];
+
+  const generateRealisticDuration = () => {
+    // Most workouts are between 30-90 minutes
+    const base = 30 + Math.floor(Math.random() * 60);
+    // Sometimes add extra time for longer workouts
+    const extra = Math.random() > 0.8 ? Math.floor(Math.random() * 60) : 0;
+    return base + extra;
+  };
+
+  const shouldHaveWorkout = () => {
+    // 70% chance of having a workout
+    return Math.random() < 0.7;
+  };
+
+  switch (period) {
+    case "Day":
+      // Generate hourly data
+      data = Array.from({ length: 24 }, (_, i) => {
+        const date = new Date(now);
+        date.setHours(date.getHours() - (23 - i));
+        return {
+          date,
+          duration:
+            i % 3 === 0 && shouldHaveWorkout()
+              ? generateRealisticDuration()
+              : 0,
+        };
+      });
+      break;
+    case "Week":
+      // Generate daily data
+      data = Array.from({ length: 7 }, (_, i) => ({
+        date: subDays(now, 6 - i),
+        duration: shouldHaveWorkout() ? generateRealisticDuration() : 0,
+      }));
+      break;
+    case "Month":
+      // Generate monthly data
+      data = Array.from({ length: 30 }, (_, i) => ({
+        date: subDays(now, 29 - i),
+        duration: shouldHaveWorkout() ? generateRealisticDuration() : 0,
+      }));
+      break;
+  }
+  return data;
 };
