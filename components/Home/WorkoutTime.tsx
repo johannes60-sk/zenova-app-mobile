@@ -15,7 +15,7 @@ export const WorkoutTime = () => {
     0
   );
 
-  const formatTotalDuration = (minutes) => {
+  const formatTotalDuration = (minutes: number) => {
     if (minutes >= 60) {
       const hours = Math.floor(minutes / 60);
       const remainingMinutes = minutes % 60;
