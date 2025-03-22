@@ -38,4 +38,5 @@ yarn-error.*
 app-example
 .scannerwork
 sonar-project.properties
+.env
 

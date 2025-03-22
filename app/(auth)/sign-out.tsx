@@ -4,14 +4,12 @@ import { useRouter } from "expo-router";
 import { useAuth } from "../context/hook/useAuth";
 
 const SignOut = () => {
-  const { signOut, isLoading, error } = useAuth();
+  const { signOut } = useAuth();
   const router = useRouter();
 
   const handleSignOut = async () => {
-    const logout = await signOut();
-    if (logout) {
-      router.replace("/(auth)");
-    }
+    await signOut();
+    router.replace("/(auth)");
   };
 
   return (

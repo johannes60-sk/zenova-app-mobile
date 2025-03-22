@@ -10,19 +10,15 @@ import {
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { useAuth } from "./context/hook/useAuth";
+import { AuthenticationState } from "./types/auth/auth";
+import useProtectedRoute from "./context/hook/use-protected-route";
 
-export default function App() {
+const App = () => {
   const colorScheme = useColorScheme();
 
-  const context = useAuth();
+  const currentUser = useAuth();
 
-  useEffect(() => {
-    if (!context.user) {
-      console.log("Utilisateur déconnecté");
-    } else {
-      console.log("Utilisateur connecté");
-    }
-  }, [context.user]);
+  useProtectedRoute(currentUser.user);
 
   return (
     <AuthProvider>
@@ -31,7 +27,7 @@ export default function App() {
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
           <Stack screenOptions={{ headerShown: false }}>
-            {context.user ? (
+            {currentUser.state === AuthenticationState.Authenticated ? (
               <Stack.Screen name="(tabs)" />
             ) : (
               <Stack.Screen name="(auth)" />
@@ -43,4 +39,6 @@ export default function App() {
       </GestureHandlerRootView>
     </AuthProvider>
   );
-}
+};
+
+export default App;

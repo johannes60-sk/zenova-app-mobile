@@ -1,31 +1,64 @@
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useState } from "react";
+import { Link, useRouter } from "expo-router";
+import { ResizeMode, Video } from "expo-av";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react-native";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Image,
-  ActivityIndicator,
   Pressable,
-  Platform,
+  ActivityIndicator,
+  StyleSheet,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react-native";
-import { ResizeMode, Video } from "expo-av";
 import { useAuth } from "../context/hook/useAuth";
+import { AuthenticationState } from "../types/auth/auth";
 import Icon from "react-native-vector-icons/Ionicons";
+import { loginSchemaValidation } from "../const/auth/auth.const";
 
 export default function SignIn() {
-  const { signIn, isLoading, error } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    signIn,
+    signInWithGoogle,
+    isLoading,
+    error: firebaseError,
+  } = useAuth();
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSignIn = async () => {
-    const success = await signIn(email, password);
-    if (success) {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginSchemaValidation),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const handleSignIn = async (data: { email: string; password: string }) => {
+    const response = await signIn(data.email, data.password);
+    if (
+      response &&
+      response.user &&
+      response.userSessionState === AuthenticationState.Authenticated
+    ) {
+      router.replace("/(tabs)");
+    }
+  };
+
+  const handleSingnInGoogle = async () => {
+    const response = await signInWithGoogle();
+    if (
+      response &&
+      response.user &&
+      response.userSessionState === AuthenticationState.Authenticated
+    ) {
       router.replace("/(tabs)");
     }
   };
@@ -42,16 +75,9 @@ export default function SignIn() {
         resizeMode={ResizeMode.COVER}
         shouldPlay
         isLooping
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-        }}
+        style={styles.videoBackground}
       />
-
       <View style={styles.overlay} />
-
-      {/* Content Container */}
       <View style={styles.content}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
@@ -62,30 +88,45 @@ export default function SignIn() {
             Let's personalize your fitness with AI
           </Text>
         </View>
-
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <Mail size={20} color="#9CA3AF" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Email address"
-              placeholderTextColor="#9CA3AF"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  style={styles.input}
+                  placeholder="Email address"
+                  placeholderTextColor="#9CA3AF"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
             />
+            {errors.email && (
+              <Text style={styles.errorText}>{errors.email.message}</Text>
+            )}
           </View>
-
           <View style={styles.inputContainer}>
             <Lock size={20} color="#9CA3AF" style={styles.inputIcon} />
-            <TextInput
-              style={[styles.input, styles.passwordInput]}
-              placeholder="Password"
-              placeholderTextColor="#9CA3AF"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  style={[styles.input, styles.passwordInput]}
+                  placeholder="Password"
+                  placeholderTextColor="#9CA3AF"
+                  secureTextEntry={!showPassword}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
             />
             <Pressable
               onPress={() => setShowPassword(!showPassword)}
@@ -97,16 +138,39 @@ export default function SignIn() {
                 <EyeOff size={20} color="#9CA3AF" />
               )}
             </Pressable>
+            {errors.password && (
+              <Text style={styles.errorText}>{errors.password.message}</Text>
+            )}
           </View>
-
-          <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
-            <Text style={styles.signInText}>Sign in</Text>
+          <TouchableOpacity
+            style={[
+              styles.signInButton,
+              // isLoading && styles.signInButtonDisabled,
+            ]}
+            className={`${isLoading ? "disabled" : ""}`}
+            onPress={handleSubmit(handleSignIn)}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <>
+                <Text style={styles.signInText}>Sign In</Text>
+                <Text style={styles.arrowIcon}>→</Text>
+              </>
+            )}
           </TouchableOpacity>
+          {firebaseError && (
+            <Text style={styles.firebaseError}>{firebaseError}</Text>
+          )}
 
           {/* Social Links */}
           <View style={styles.socialContainer}>
-            <TouchableOpacity style={styles.socialButton}>
-              <Icon name="logo-instagram" color="#fff" size={24} />
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={handleSingnInGoogle}
+            >
+              <Icon name="logo-google" color="#fff" size={24} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.socialButton}>
               <Icon name="logo-facebook" color="#fff" size={24} />
@@ -116,12 +180,14 @@ export default function SignIn() {
             </TouchableOpacity>
           </View>
 
+          {/* Divider */}
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
             <Text style={styles.dividerText}>or</Text>
             <View style={styles.dividerLine} />
           </View>
 
+          {/* Bottom Links */}
           <View style={styles.bottomLinks}>
             <Link href="/sign-in" style={styles.link}>
               <Text style={styles.linkText}>
@@ -143,16 +209,8 @@ export default function SignIn() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  backgroundImage: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    opacity: 0.5,
-  },
+  container: { flex: 1, backgroundColor: "#000" },
+  videoBackground: { position: "absolute", width: "100%", height: "100%" },
   overlay: {
     position: "absolute",
     width: "100%",
@@ -167,10 +225,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
   },
-  header: {
-    alignItems: "center",
-    marginBottom: 48,
-  },
+  header: { alignItems: "center", marginBottom: 48 },
   logoContainer: {
     width: 44,
     height: 44,
@@ -178,48 +233,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF6B00",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 24,
-    ...Platform.select({
-      web: {
-        boxShadow: "0 0 20px rgba(255, 107, 0, 0.3)",
-      },
-      default: {
-        shadowColor: "#FF6B00",
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.3,
-        shadowRadius: 20,
-      },
-    }),
   },
-  logo: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#FFF",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#FFF",
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    textAlign: "center",
-  },
-  form: {
-    width: "100%",
-  },
-  inputContainer: {
-    marginBottom: 16,
-    position: "relative",
-  },
-  inputIcon: {
-    position: "absolute",
-    left: 16,
-    top: 14,
-    zIndex: 1,
-  },
+
+  logo: { fontSize: 24, fontWeight: "bold", color: "#FFF" },
+  title: { fontSize: 24, fontWeight: "bold", color: "#FFF", marginBottom: 8 },
+  subtitle: { fontSize: 14, color: "#9CA3AF", textAlign: "center" },
+
+  form: { width: "100%" },
+  inputContainer: { marginBottom: 16, position: "relative" },
+  inputIcon: { position: "absolute", left: 16, top: 14, zIndex: 1 },
+
   input: {
     height: 48,
     backgroundColor: "rgba(255, 255, 255, 0.1)",
@@ -230,43 +253,38 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.1)",
   },
-  passwordInput: {
-    paddingRight: 48,
-  },
-  eyeIcon: {
-    position: "absolute",
-    right: 16,
-    top: 14,
+  passwordInput: { paddingRight: 48 },
+  eyeIcon: { position: "absolute", right: 16, top: 14 },
+
+  errorText: { color: "#FF6B00", fontSize: 12, marginTop: 4 },
+
+  firebaseError: {
+    color: "#FF6B00",
+    fontSize: 13,
+    marginTop: 8,
+    textAlign: "center",
   },
   signInButton: {
-    height: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    height: 38,
     backgroundColor: "#FF6B00",
     borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
     marginTop: 8,
-    ...Platform.select({
-      web: {
-        boxShadow: "0 0 20px rgba(255, 107, 0, 0.3)",
-      },
-      default: {
-        shadowColor: "#FF6B00",
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.3,
-        shadowRadius: 20,
-      },
-    }),
   },
-  signInText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
+  signInButtonDisabled: { opacity: 0.7 },
+  signInText: { color: "#FFF", fontSize: 16, fontWeight: "600" },
   socialContainer: {
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 38,
     gap: 20,
+  },
+  arrowIcon: {
+    color: "#fff",
+    fontSize: 24,
+    marginLeft: 5,
   },
   socialButton: {
     width: 48,
@@ -281,7 +299,7 @@ const styles = StyleSheet.create({
   divider: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 24,
+    marginVertical: 18,
   },
   dividerLine: {
     flex: 1,
@@ -294,19 +312,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   bottomLinks: {
-    marginTop: 20,
     alignItems: "center",
   },
   link: {
     paddingVertical: 8,
     color: "#E86C2C",
-    // textDecorationLine: "underline",
   },
   linkText: {
     color: "#E0E0E0",
     fontSize: 14,
   },
   forgotPassword: {
-    marginTop: 15,
+    marginTop: 8,
   },
 });

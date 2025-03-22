@@ -197,9 +197,9 @@ export const DAILY_WORKOUTS: { [dayKey: string]: Workout } = {
 };
 
 // Generate realistic workout data
-export const generateWorkoutData = (period) => {
+export const generateWorkoutData = (period: string) => {
   const now = new Date();
-  let data = [];
+  let data: { date: Date; duration: number }[] = [];
 
   const generateRealisticDuration = () => {
     // Most workouts are between 30-90 minutes

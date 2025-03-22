@@ -1,27 +1,18 @@
-// Simuler une base de données locale
-export const USERS = [
-  {
-    id: "1",
-    email: "demo@example.com",
-    username: "John Doe",
-    password: "admin-subscription",
-  },
-  {
-    id: "2",
-    email: "test@example.com",
-    username: "John Doe",
-    password: "password123",
-  },
-  {
-    id: "3",
-    email: "user@example.com",
-    username: "Jane Doe",
-    password: "password456",
-  },
-  {
-    id: "4",
-    email: "johannes@gmail.com",
-    username: "Johannes",
-    password: "johannes",
-  },
-];
+import { z } from "zod";
+
+export const signUpSchemaValidation = z
+  .object({
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export const loginSchemaValidation = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});

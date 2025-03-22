@@ -1,18 +1,12 @@
-import { AuthState } from "../types/auth/auth";
-
-type User = {
-  id: string;
-  username: string;
-  email: string;
-  password: string;
-};
+import { User as FirebaseUser } from "firebase/auth";
+import { AuthenticationState, AuthState } from "../types/auth/auth";
 
 export type AuthAction =
-  | { type: "SIGN_IN"; user: User }
-  | { type: "SIGN_UP"; user: User }
-  | { type: "SIGN_OUT" }
+  | { type: "SIGN_IN"; user: FirebaseUser; state: AuthenticationState }
+  | { type: "SIGN_UP"; user: FirebaseUser; state: AuthenticationState }
+  | { type: "SIGN_OUT"; state: AuthenticationState }
   | { type: "SET_ERROR"; error: string }
-  | { type: "LOADING" };
+  | { type: "LOADING"; state: AuthenticationState };
 
 export const authReducer = (
   state: AuthState,
@@ -21,13 +15,33 @@ export const authReducer = (
   switch (action.type) {
     case "SIGN_IN":
     case "SIGN_UP":
-      return { ...state, user: action.user, isLoading: false, error: null };
+      return {
+        ...state,
+        state: action.state,
+        user: action.user,
+        isLoading: false,
+        error: null,
+      };
+
     case "SIGN_OUT":
-      return { ...state, user: null, isLoading: false, error: null };
+      return {
+        ...state,
+        state: action.state,
+        user: null,
+        isLoading: false,
+        error: null,
+      };
+
     case "SET_ERROR":
       return { ...state, error: action.error, isLoading: false };
+
     case "LOADING":
-      return { ...state, isLoading: true, error: null };
+      return {
+        ...state,
+        state: action.state,
+        isLoading: true,
+        error: null,
+      };
     default:
       return state;
   }
